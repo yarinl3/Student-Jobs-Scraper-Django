@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+
+{%block title%}Scrap Jobs{%endblock%}
+
+{%block page_name %}Scrap Jobs{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<script>
+    function toggle(source) {
+        jobs_sites = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
+        for(var j=0; j<5; j++){
+            checkboxes = document.getElementsByName(jobs_sites[j]);
+            for(var i=0, n=checkboxes.length;i<n;i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+    }
+</script>
+
+
+
+    <form method="POST" action="#" class="form-group">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <button type="submit" name="save" class="btn btn-success">Scrap</button>
+        <p>
+            {% for error in errors %}
+                {% if 'successfully' in error %}
+                    <div class="alert alert-success" role="alert">
+                        {{error}}
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger" role="alert">
+                        {{error}}
+                    </div>
+                {% endif %}
+        {% endfor %}
+        </p>
+    </form>
+{% endblock %}
