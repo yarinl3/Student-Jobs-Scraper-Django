@@ -61,7 +61,7 @@ def scrap(response):
                 def foo(checked, user):
                     if jobs_scrap(checked, user) is True:
                         errors.append(f'{checked} scraped successfully.')
-                timeout = 10
+                timeout = 5
                 for i in checked_list:
                     t = Thread(target=foo, args=(i, username))
                     threads.append(t)
