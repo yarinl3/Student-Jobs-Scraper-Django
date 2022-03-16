@@ -4,6 +4,7 @@ from .forms import ScrapForm, JobsListFrom
 from bs4 import BeautifulSoup
 from .Student_Jobs import jobs_scrap
 from .models import JobsList, Job, ScrapedJobs
+from threading import Thread
 
 
 # Create your views here.
@@ -53,11 +54,21 @@ def scrap(response):
                             checked_list.append(i['name'])
                     except Exception:
                         pass
-                for i in checked_list:
-                    if jobs_scrap(i, username) is True:
-                        errors.append(f'{i} scraped successfully.')
+                threads = []
+
+                def foo(checked, user):
+                    if jobs_scrap(checked, user) is True:
+                        errors.append(f'{checked} scraped successfully.')
                     else:
-                        errors.append(f'Failed to scrap {i}.')
+                        errors.append(f'Failed to scrap {checked}.')
+
+                for i in checked_list:
+                    t = Thread(target=foo, args=(i, username))
+                    threads.append(t)
+                    t.start()
+                for t in threads:
+                    t.join()
+
         else:
             form = ScrapForm()
         return render(response, 'main/scrap.html', {'form': form, 'errors': errors, 'username': response.user})
