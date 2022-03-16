@@ -5,16 +5,20 @@ __version__ = '1.0.0'
 __author__ = 'Yarin Levi <yarinl330@gmail.com>'
 
 from bs4 import BeautifulSoup
-import requests
+import os
 from selenium import webdriver
 from main.models import ScrapedJobs
 
 
 def drushim(user):
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argoment("--headless")
+    chrome_options.add_argoment("--disable-dev-shm-usage")
+    chrome_options.add_argoment("--no-sandbox")
+    
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
     url = 'https://www.drushim.co.il/jobs/subcat/406/'
-    options = webdriver.FirefoxOptions()
-    options.headless = True
-    driver = webdriver.Firefox(options=options)
     driver.get(url)
     while True:
         try:
