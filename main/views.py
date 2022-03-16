@@ -63,7 +63,7 @@ def scrap(response):
                         errors.append(f'{checked} scraped successfully.')
                     else:
                         errors.append(f'Failed to scrap {checked}.')
-                timeout = 25
+                timeout = 10
                 for i in checked_list:
                     t = Thread(target=foo, args=(i, username))
                     threads.append(t)
