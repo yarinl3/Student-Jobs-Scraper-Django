@@ -61,8 +61,6 @@ def scrap(response):
                 def foo(checked, user):
                     if jobs_scrap(checked, user) is True:
                         errors.append(f'{checked} scraped successfully.')
-                    else:
-                        errors.append(f'Failed to scrap {checked}.')
                 timeout = 10
                 for i in checked_list:
                     t = Thread(target=foo, args=(i, username))
@@ -74,6 +72,15 @@ def scrap(response):
                     timeout -= time.time() - start_time
                     if timeout < 0:
                         timeout = 0
+                for site in checked_list:
+                    site_in_errors = False
+                    for error in errors:
+                        if site in error:
+                            site_in_errors = True
+                    if site_in_errors is False:
+                        errors.append(f'Failed to scrap {checked} completely.\n'
+                                      f'Some jobs may have been saved.')
+
         else:
             form = ScrapForm()
         return render(response, 'main/scrap.html', {'form': form, 'errors': errors, 'username': response.user})
