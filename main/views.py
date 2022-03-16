@@ -78,7 +78,7 @@ def scrap(response):
                         if site in error:
                             site_in_errors = True
                     if site_in_errors is False:
-                        errors.append(f'Failed to scrap {checked} completely.\n'
+                        errors.append(f'Failed to scrap {site} completely.\n'
                                       f'Some jobs may have been saved.')
 
         else:
