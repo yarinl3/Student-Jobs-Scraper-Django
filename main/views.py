@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from .forms import ScrapForm, JobsListFrom
@@ -61,14 +63,17 @@ def scrap(response):
                         errors.append(f'{checked} scraped successfully.')
                     else:
                         errors.append(f'Failed to scrap {checked}.')
-
+                timeout = 25
                 for i in checked_list:
                     t = Thread(target=foo, args=(i, username))
                     threads.append(t)
                     t.start()
                 for t in threads:
-                    t.join()
-
+                    start_time = time.time()
+                    t.join(timeout)
+                    timeout -= time.time() - start_time
+                    if timeout < 0:
+                        timeout = 0
         else:
             form = ScrapForm()
         return render(response, 'main/scrap.html', {'form': form, 'errors': errors, 'username': response.user})
