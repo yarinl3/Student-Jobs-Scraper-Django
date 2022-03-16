@@ -13,11 +13,11 @@ from main.models import ScrapedJobs
 def drushim(user):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    chrome_options.add_argoment("--headless")
-    chrome_options.add_argoment("--disable-dev-shm-usage")
-    chrome_options.add_argoment("--no-sandbox")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
     
-    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     url = 'https://www.drushim.co.il/jobs/subcat/406/'
     driver.get(url)
     while True:
