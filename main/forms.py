@@ -2,7 +2,7 @@ from django import forms
 
 
 class ScrapForm(forms.Form):
-    all = forms.BooleanField(label='Select all', required=False)
+    all = forms.BooleanField(label='Select all',  required=False)
     all.widget = forms.CheckboxInput(attrs={'onClick': "toggle(this)"})
     alljobs = forms.BooleanField(label='AllJobs', required=False)
     drushim = forms.BooleanField(label='Drushim', required=False)

@@ -20,9 +20,15 @@
 
 
 
-    <form method="POST" action="#" class="form-group">
+    <form method="POST" action="#" class="form-group" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form|crispy }}
+       <div class="input-group mb-3">
+           <div class="custom-file">
+               <input type="file" class="custom-file-input" id="upload" name="upload" accept="application/JSON">
+               <label class="col-sm-4 custom-file-label" for="upload">Choose telegram json file</label>
+           </div>
+       </div>
 
         <button type="submit" name="save" class="btn btn-success">Scrap</button>
         <p>
@@ -39,4 +45,18 @@
         {% endfor %}
         </p>
     </form>
+
+    <script>
+        var uploadFile = document.getElementById('upload'); /* finds the input */
+        function changeLabelText() {
+            var uploadValue = uploadFile.value; /* gets the filepath and filename from the input */
+            var fileNameStart = uploadValue.lastIndexOf('\\'); /* finds the end of the filepath */
+            uploadValue = uploadValue.substr(fileNameStart + 1); /* isolates the filename */
+            var uploadFileLabelText = document.querySelector('label[for="upload"]').childNodes[0]; /* finds the label text */
+            if (uploadValue !== '') {
+                uploadFileLabelText.textContent = uploadValue; /* changes the label text */
+            }
+        }
+        uploadFile.addEventListener('change',changeLabelText,false);
+    </script>
 {% endblock %}

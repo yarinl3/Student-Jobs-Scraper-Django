@@ -8,7 +8,8 @@ import json
 from main.models import ScrapedJobs
 
 
-def telegram_jobs(user):
+def telegram_jobs(user, *args):
+    error_flag = False
     try:
         blocked_job_titles = [i.replace('\n', '') for i in
                               open('Jobs files/blocked_job_titles.txt', encoding='utf-8').readlines()]
@@ -19,10 +20,13 @@ def telegram_jobs(user):
                                  open('Jobs files/blocked_job_location.txt', encoding='utf-8').readlines()]
     except FileNotFoundError:
         blocked_job_locations = []
-    unfiltered_jobs = make_list()
+    if len(args) != 0:
+        unfiltered_jobs, error_flag = make_list(args[0])
+    else:
+        unfiltered_jobs, error_flag = make_list()
+    if error_flag is True:
+        return 'Failed to load telegram json file.'
     filtered_jobs = make_filtered_job_list(unfiltered_jobs, blocked_job_titles, blocked_job_locations)
-    if len(filtered_jobs) == 0:
-        raise Exception('len(filtered_jobs) = 0')
 
     t = ScrapedJobs.objects
     if len(t.filter(name=user)) == 1:
@@ -32,31 +36,27 @@ def telegram_jobs(user):
 
 
 # Creates a list that contains all jobs for students:
-def make_list():
+def make_list(*args):
     jobs = []
     file_path = 'Jobs files/result.json'
-    while True:
-        try:
-            site_json = json.loads(open(file_path, encoding='utf-8').read())
-            break
-        except FileNotFoundError:
-            print('\nError: result.json not found.\n'
-                  'Do you want to enter file path?')
-            choice = input('\t[Y] Yes  [N] No  (default is "N"):\n')
-            if choice.lower() in ['y', 'yes']:
-                file_path = input('Enter file path: ')
-            else:
-                return jobs
 
-    for i in site_json['messages']:
-        for j in i['text']:
-            try:
-                if type(j) == dict and 'student' in j['text'].lower():
-                    jobs.append(i['text'])
-                    break
-            except KeyError:
-                pass
-    return jobs
+    try:
+        if len(args) != 0:
+            site_json = json.loads(args[0].read())
+        else:
+            site_json = json.loads(open(file_path, encoding='utf-8').read())
+
+        for i in site_json['messages']:
+            for j in i['text']:
+                try:
+                    if type(j) == dict and 'student' in j['text'].lower():
+                        jobs.append(i['text'])
+                        break
+                except KeyError:
+                    pass
+    except Exception:
+        return jobs, True
+    return jobs, False
 
 
 def make_filtered_job_list(jobs, blocked_job_titles, blocked_job_locations):

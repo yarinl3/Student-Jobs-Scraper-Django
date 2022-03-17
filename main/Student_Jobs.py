@@ -12,12 +12,16 @@ except Exception:
     pass
 
 
-def jobs_scrap(func, user):
+def jobs_scrap(func, user, *args):
     funcs = {'alljobs': alljobs, 'drushim': drushim, 'jobmaster': jobmaster,
              'sqlink': sqlink, 'telegram_jobs': telegram_jobs}
     try:
-        funcs[func](user)
-        return True
+        if len(args) != 0:
+            error = telegram_jobs(user, args[0])
+        else:
+            error = funcs[func](user)
+        if error is not None:
+            return False, error
+        return True, error
     except Exception as e:
-        print(e)
-        return False
+        return False, e
