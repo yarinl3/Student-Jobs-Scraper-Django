@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from .forms import ScrapForm, JobsListFrom
 from .Student_Jobs import jobs_scrap
-from .models import JobsList, Job, ScrapedJobs
+from .models import JobsList, Job, ScrapedJobs, WishlistJobs
 from threading import Thread
 CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
 
@@ -24,10 +24,76 @@ def job_list(response):
                 val = form.cleaned_data.get("btn")
                 if val == 'Delete':
                     ScrapedJobs.objects.get(name=username).job_set.filter(link=link).delete()
-
+                if val == 'Add to Wishlist':
+                    job = ScrapedJobs.objects.get(name=username).job_set.filter(link=link)
+                    if len(job) > 0:
+                        job = job[0]
+                        WishlistJobs.objects.get(name=username).job_set.create(title=job.title, link=job.link, sent=job.sent)
+                        ScrapedJobs.objects.get(name=username).job_set.filter(link=link).delete()
+                if val == 'Add to Sent':
+                    ScrapedJobs.objects.get(name=username).job_set.filter(link=link).update(sent=True)
         else:
             form = JobsListFrom()
-        return render(response, 'main/job_list.html', {'form': form, 'jobs': jobs, 'username': response.user})
+        new_jobs = []
+        for job in jobs:
+            if job.sent is False:
+                new_jobs.append(job)
+        return render(response, 'main/job_list.html', {'form': form, 'jobs': new_jobs, 'username': response.user})
+    else:
+        raise PermissionDenied()
+
+
+def wishlist(response):
+    if response.user.is_anonymous is False:
+        username = str(response.user)
+        jobs = WishlistJobs.objects.get(name=username).job_set.all()
+        if response.method == "POST":
+            form = JobsListFrom(response.POST)
+            if form.is_valid():
+                link = form.cleaned_data.get("link")
+                val = form.cleaned_data.get("btn")
+                if val == 'Delete':
+                    WishlistJobs.objects.get(name=username).job_set.filter(link=link).delete()
+                if val == 'Add to Sent':
+                    WishlistJobs.objects.get(name=username).job_set.filter(link=link).update(sent=True)
+        else:
+            form = JobsListFrom()
+        new_jobs = []
+        for job in jobs:
+            if job.sent is False:
+                new_jobs.append(job)
+        return render(response, 'main/wishlist.html', {'form': form, 'jobs': new_jobs, 'username': response.user})
+    else:
+        raise PermissionDenied()
+
+
+def sent(response):
+    if response.user.is_anonymous is False:
+        username = str(response.user)
+        new_jobs = []
+        for job in WishlistJobs.objects.get(name=username).job_set.all():
+            if job.sent is True:
+                new_jobs.append(job)
+        for job in ScrapedJobs.objects.get(name=username).job_set.all():
+            if job.sent is True:
+                new_jobs.append(job)
+        if response.method == "POST":
+            form = JobsListFrom(response.POST)
+            if form.is_valid():
+                link = form.cleaned_data.get("link")
+                val = form.cleaned_data.get("btn")
+                if val == 'Delete':
+                    wishlist_filter = WishlistJobs.objects.get(name=username).job_set.filter(link=link)
+                    scraped_jobs_filter = ScrapedJobs.objects.get(name=username).job_set.filter(link=link)
+                    if len(wishlist_filter) > 0:
+                        new_jobs.remove((wishlist_filter[0]))
+                    elif len(scraped_jobs_filter) > 0:
+                        new_jobs.remove((scraped_jobs_filter[0]))
+                    wishlist_filter.delete()
+                    scraped_jobs_filter.delete()
+        else:
+            form = JobsListFrom()
+        return render(response, 'main/sent.html', {'form': form, 'jobs': new_jobs, 'username': response.user})
     else:
         raise PermissionDenied()
 
@@ -86,7 +152,12 @@ def scrap(response):
                         errors.append(f'Timeout: 25 seconds passed and the scraping did not end.\n'
                                       f'If the connection to {site} is correct it will continue the scraping'
                                       f' in the background. ')
-
+                wishlist_jobs = WishlistJobs.objects.get(name=username).job_set.all()
+                scraped_jobs = ScrapedJobs.objects.get(name=username).job_set.all()
+                for scraped_job in scraped_jobs:
+                    for wishlist_job in wishlist_jobs:
+                        if scraped_job.link == wishlist_job.link:
+                            ScrapedJobs.objects.get(name=username).job_set.filter(link=scraped_job.link).delete()
         else:
             form = ScrapForm()
         return render(response, 'main/scrap.html', {'form': form, 'errors': errors, 'username': response.user})
