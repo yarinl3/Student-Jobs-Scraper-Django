@@ -18,11 +18,19 @@ class ScrapedJobs(models.Model):
 
 
 class JobsFilters(models.Model):
-    scraped_jobs = models.ForeignKey(ScrapedJobs, on_delete=models.CASCADE)
-    keyword_filter = models.CharField(max_length=50)
+    jobs_list = models.OneToOneField(JobsList, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.keyword_filter
+        return self.name
+
+
+class Keyword(models.Model):
+    jobs_filter = models.ForeignKey(JobsFilters, on_delete=models.CASCADE)
+    keyword = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.keyword
 
 
 class WishlistJobs(models.Model):

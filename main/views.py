@@ -1,9 +1,9 @@
 import time
 from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
-from .forms import ScrapForm, JobsListFrom
+from .forms import ScrapForm, JobsListFrom, AddKeywordForm, DeleteKeywordForm
 from .Student_Jobs import jobs_scrap
-from .models import JobsList, Job, ScrapedJobs, WishlistJobs
+from .models import JobsList, Job, ScrapedJobs, WishlistJobs, JobsFilters
 from threading import Thread
 CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
 
@@ -16,6 +16,12 @@ def home(response):
 def job_list(response):
     if response.user.is_anonymous is False:
         username = str(response.user)
+        keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
+        jobs = ScrapedJobs.objects.get(name=username).job_set.all()
+        for job in jobs:
+            for keyword in keywords_list:
+                if keyword.keyword in job.title.lower():
+                    ScrapedJobs.objects.get(name=username).job_set.filter(link=job.link).delete()
         jobs = ScrapedJobs.objects.get(name=username).job_set.all()
         if response.method == "POST":
             form = JobsListFrom(response.POST)
@@ -117,6 +123,7 @@ def scrap(response):
                     raise Exception(fr"Error: error in main\views.py, there is more than one list for {username}")
                 ScrapedJobs.objects.get(name=username).delete()
                 ScrapedJobs(jobs_list=JobsList.objects.get(name=username), name=username).save()
+
                 res = response.POST
                 for key in res:
                     if key in CHECKBOXLIST and res.get(key) == 'on':
@@ -161,5 +168,26 @@ def scrap(response):
         else:
             form = ScrapForm()
         return render(response, 'main/scrap.html', {'form': form, 'errors': errors, 'username': response.user})
+    else:
+        raise PermissionDenied()
+
+
+def keywords(response):
+    if response.user.is_anonymous is False:
+        username = str(response.user)
+        add_form = AddKeywordForm(response.POST)
+        del_form = DeleteKeywordForm(response.POST)
+        if response.method == "POST":
+            if add_form.is_valid():
+                keyword = add_form.cleaned_data.get('keyword')
+                if keyword != '' and \
+                        len(JobsFilters.objects.get(name=username).keyword_set.filter(keyword=keyword.lower())) == 0:
+                    JobsFilters.objects.get(name=username).keyword_set.create(keyword=keyword.lower())
+            elif del_form.is_valid():
+                keyword = del_form.cleaned_data.get('delete')
+                JobsFilters.objects.get(name=username).keyword_set.filter(keyword=keyword.lower()).delete()
+
+        keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
+        return render(response, 'main/keywords.html', {'form': add_form, 'keywords': keywords_list, 'username': response.user})
     else:
         raise PermissionDenied()

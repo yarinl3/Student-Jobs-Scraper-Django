@@ -1,0 +1,30 @@
+{% extends 'main/base.html' %}
+
+{%block title%}Unwanted Keywords{%endblock%}
+
+{%block page_name %}Unwanted Keywords{% endblock %}
+
+{% block content %}
+    <form method="POST" action="#">
+        {% csrf_token %}
+    {% for keyword in keywords%}
+
+        <div class="btn-group" role="group">
+            <button class="btn btn-secondary keyword">{{keyword}}</button>
+            <button type="submit" class="btn btn-danger mr-2" name="delete" onclick="this.value='{{keyword}}'">X</button>
+        </div>
+
+    {% endfor %}
+    </form>
+
+    <form method="POST" action="#">
+        {% csrf_token %}
+        <h2>Add new keyword:</h2>
+        <label>
+            <input type="text" name="keyword">
+        </label>
+        <input type="submit" name="btn" class="btn btn-primary" value="Add">
+    </form>
+
+{% endblock %}
+

@@ -14,3 +14,12 @@ class ScrapForm(forms.Form):
 class JobsListFrom(forms.Form):
     btn = forms.CharField()
     link = forms.CharField()
+
+
+class AddKeywordForm(forms.Form):
+    keyword = forms.CharField()
+    btn = forms.CharField()
+
+
+class DeleteKeywordForm(forms.Form):
+    delete = forms.CharField()

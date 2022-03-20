@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import RegisterForm
-from main.models import JobsList, ScrapedJobs, WishlistJobs
+from main.models import JobsList, ScrapedJobs, WishlistJobs, JobsFilters
 
 
 # Create your views here.
@@ -13,6 +13,7 @@ def register(response):
             JobsList(name=username).save()
             ScrapedJobs(jobs_list=JobsList.objects.get(name=username), name=username).save()
             WishlistJobs(jobs_list=JobsList.objects.get(name=username), name=username).save()
+            JobsFilters(jobs_list=JobsList.objects.get(name=username), name=username).save()
         return redirect('/')
     else:
         form = RegisterForm()

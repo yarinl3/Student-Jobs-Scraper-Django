@@ -7,4 +7,5 @@ urlpatterns = [
     path('wishlist/', views.wishlist, name='wishlist'),
     path('sent/', views.sent, name='sent'),
     path('scrap/', views.scrap, name='scrap'),
+    path('keywords/', views.keywords, name='keywords'),
 ]
