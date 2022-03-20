@@ -9,12 +9,6 @@ from main.models import ScrapedJobs
 
 
 def telegram_jobs(user, *args):
-    error_flag = False
-    try:
-        blocked_job_titles = [i.replace('\n', '') for i in
-                              open('Jobs files/blocked_job_titles.txt', encoding='utf-8').readlines()]
-    except FileNotFoundError:
-        blocked_job_titles = []
     try:
         blocked_job_locations = [i.replace('\n', '') for i in
                                  open('Jobs files/blocked_job_location.txt', encoding='utf-8').readlines()]
@@ -26,7 +20,7 @@ def telegram_jobs(user, *args):
         unfiltered_jobs, error_flag = make_list()
     if error_flag is True:
         return 'Failed to load telegram json file.'
-    filtered_jobs = make_filtered_job_list(unfiltered_jobs, blocked_job_titles, blocked_job_locations)
+    filtered_jobs = make_filtered_job_list(unfiltered_jobs, blocked_job_locations)
 
     t = ScrapedJobs.objects
     if len(t.filter(name=user)) == 1:
@@ -59,8 +53,8 @@ def make_list(*args):
     return jobs, False
 
 
-def make_filtered_job_list(jobs, blocked_job_titles, blocked_job_locations):
-    """Filter jobs by keywords and locations"""
+def make_filtered_job_list(jobs, blocked_job_locations):
+    """Filter jobs by locations"""
     filtered_jobs = []
     for job in jobs:
         try:
@@ -73,18 +67,10 @@ def make_filtered_job_list(jobs, blocked_job_titles, blocked_job_locations):
             if job_location.find('Location:') != -1 and job_location.find('Press') != -1:
                 job_location = job_location[job_location.find('Location:')+10:job_location.find('Press')]
 
-            for title in blocked_job_titles:
-                if title.lower() in job_title.lower() and 'software' not in job_title.lower():
+            for location in blocked_job_locations:
+                if location.lower() in job_location.lower():
                     block_flag = True
                     break
-
-            if block_flag is False:
-                for location in blocked_job_locations:
-                    # Leaves in the list jobs with several locations including Tel Aviv:
-                    if location.lower() in job_location.lower() and 'tel ' not in job_location.lower()\
-                            and 'tel-' not in job_location.lower():
-                        block_flag = True
-                        break
 
             if block_flag is False:
                 filtered_jobs.append((job_link, job_title))
