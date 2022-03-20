@@ -50,4 +50,5 @@ def drushim(user):
     if len(t.filter(name=user)) == 1:
         t = t.get(name=user)
         for job in jobs:
-            t.job_set.create(title=job[1], link=job[0], sent=False)
+            if len(t.job_set.filter(link=job[0])) == 0:
+                t.job_set.create(title=job[1], link=job[0], sent=False, deleted=False)
