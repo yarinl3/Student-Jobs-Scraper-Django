@@ -20,7 +20,7 @@ def job_list(response):
         jobs = ScrapedJobs.objects.get(name=username).job_set.all()
         for job in jobs:
             for keyword in keywords_list:
-                if keyword.keyword in job.title.lower():
+                if keyword.keyword in job.title.lower() or keyword.keyword in job.link.lower():
                     ScrapedJobs.objects.get(name=username).job_set.filter(link=job.link).delete()
         jobs = ScrapedJobs.objects.get(name=username).job_set.all()
         if response.method == "POST":
