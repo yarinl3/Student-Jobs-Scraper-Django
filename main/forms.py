@@ -23,3 +23,7 @@ class AddKeywordForm(forms.Form):
 
 class DeleteKeywordForm(forms.Form):
     delete = forms.CharField()
+
+
+class UpdateKeywordForm(forms.Form):
+    update = forms.CharField()

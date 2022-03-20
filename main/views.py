@@ -1,7 +1,7 @@
 import time
 from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
-from .forms import ScrapForm, JobsListFrom, AddKeywordForm, DeleteKeywordForm
+from .forms import ScrapForm, JobsListFrom, AddKeywordForm, DeleteKeywordForm, UpdateKeywordForm
 from .Student_Jobs import jobs_scrap
 from .models import JobsList, Job, ScrapedJobs, WishlistJobs, JobsFilters
 from threading import Thread
@@ -16,12 +16,6 @@ def home(response):
 def job_list(response):
     if response.user.is_anonymous is False:
         username = str(response.user)
-        keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
-        jobs = ScrapedJobs.objects.get(name=username).job_set.all()
-        for job in jobs:
-            for keyword in keywords_list:
-                if keyword.keyword in job.title.lower() or keyword.keyword in job.link.lower():
-                    ScrapedJobs.objects.get(name=username).job_set.filter(link=job.link).delete()
         jobs = ScrapedJobs.objects.get(name=username).job_set.all()
         if response.method == "POST":
             form = JobsListFrom(response.POST)
@@ -177,6 +171,7 @@ def keywords(response):
         username = str(response.user)
         add_form = AddKeywordForm(response.POST)
         del_form = DeleteKeywordForm(response.POST)
+        update_form = UpdateKeywordForm(response.POST)
         if response.method == "POST":
             if add_form.is_valid():
                 keyword = add_form.cleaned_data.get('keyword')
@@ -186,6 +181,13 @@ def keywords(response):
             elif del_form.is_valid():
                 keyword = del_form.cleaned_data.get('delete')
                 JobsFilters.objects.get(name=username).keyword_set.filter(keyword=keyword.lower()).delete()
+            elif update_form.is_valid():
+                keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
+                jobs = ScrapedJobs.objects.get(name=username).job_set.all()
+                for job in jobs:
+                    for keyword in keywords_list:
+                        if keyword.keyword in job.title.lower() or keyword.keyword in job.link.lower():
+                            ScrapedJobs.objects.get(name=username).job_set.filter(link=job.link).delete()
 
         keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
         return render(response, 'main/keywords.html', {'form': add_form, 'keywords': keywords_list, 'username': response.user})

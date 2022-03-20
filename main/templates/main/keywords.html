@@ -15,13 +15,17 @@
                 {% endfor %}
     </form>
 
-    <form method="POST" action="#">
+    <form method="POST" action="#" style="margin-bottom: 20px;">
         {% csrf_token %}
         <h2>Add new keyword:</h2>
         <label>
             <input type="text" name="keyword">
         </label>
         <input type="submit" name="btn" class="btn btn-primary" value="Add">
+    </form>
+    <form method="POST" action="#">
+        {% csrf_token %}
+        <input type="submit" name="update" class="btn btn-success" value="Update Job List">
     </form>
 
 {% endblock %}
