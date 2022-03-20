@@ -1,7 +1,16 @@
 {% extends 'main/base.html' %}
 {%block title%}Home Page{%endblock%}
 
+{%block page_name %}Student Jobs Scraper{% endblock %}
+
 {% block content %}
-    <h1>This is the home page.</h1>
+
+    <form method="POST" action="#" style="margin-top: 100px;">
+        {% csrf_token %}
+        <div class="job-list">
+            <span style="font-size: 40px">ליצירה אוטומטית של משתמש אורח (ללא הרשמה)</span>
+            <input type="submit" name="btn" class="btn btn-primary" style="font-size: 40px" value="לחץ כאן">
+        </div>
+    </form>
 {% endblock %}
 

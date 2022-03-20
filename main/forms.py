@@ -26,4 +26,9 @@ class DeleteKeywordForm(forms.Form):
 
 
 class UpdateKeywordForm(forms.Form):
+    ckbx = forms.BooleanField(required=False)
     update = forms.CharField()
+
+
+class GuestRegistrationForm(forms.Form):
+    btn = forms.CharField()

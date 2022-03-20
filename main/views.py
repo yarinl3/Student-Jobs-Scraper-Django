@@ -1,7 +1,9 @@
 import time
 from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
-from .forms import ScrapForm, JobsListFrom, AddKeywordForm, DeleteKeywordForm, UpdateKeywordForm
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+from .forms import ScrapForm, JobsListFrom, AddKeywordForm, DeleteKeywordForm, UpdateKeywordForm, GuestRegistrationForm
 from .Student_Jobs import jobs_scrap
 from .models import JobsList, Job, ScrapedJobs, WishlistJobs, JobsFilters
 from threading import Thread
@@ -10,7 +12,50 @@ CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
 
 # Create your views here.
 def home(response):
-    return render(response, 'main/home.html', {'username': response.user})
+    if response.user.is_anonymous is True:
+        if response.method == "POST":
+            form = GuestRegistrationForm(response.POST)
+            if form.is_valid():
+                val = form.cleaned_data.get("btn")
+                if val == 'לחץ כאן':
+                    try:
+                        counter = 1
+                        while True:
+                            username = f'guest-{counter}'
+                            if len(JobsList.objects.filter(name=username)) == 0:
+                                break
+                            counter += 1
+                        user = User.objects.create_user(username, password='12345')
+                        user.is_superuser = False
+                        user.is_staff = False
+                        user.save()
+                        JobsList(name=username).save()
+                        ScrapedJobs(jobs_list=JobsList.objects.get(name=username), name=username).save()
+                        WishlistJobs(jobs_list=JobsList.objects.get(name=username), name=username).save()
+                        JobsFilters(jobs_list=JobsList.objects.get(name=username), name=username).save()
+
+                        copy_jobs = ScrapedJobs.objects.get(name='guest-1').job_set.all()
+                        for job_copy in copy_jobs:
+                            ScrapedJobs.objects.get(name=username).job_set.create(
+                                title=job_copy.title, link=job_copy.link, sent=job_copy.sent)
+                        copy_jobs = WishlistJobs.objects.get(name='guest-1').job_set.all()
+                        for job_copy in copy_jobs:
+                            WishlistJobs.objects.get(name=username).job_set.create(
+                                title=job_copy.title, link=job_copy.link, sent=job_copy.sent)
+                        copy_keywords = JobsFilters.objects.get(name='guest-1').keyword_set.all()
+                        for keyword_copy in copy_keywords:
+                            JobsFilters.objects.get(name=username).keyword_set.create(keyword=keyword_copy)
+
+                        if user is not None:
+                            login(response, user)
+                    except Exception as e:
+                        print(f'Error in views.home, counter = {counter}, Error: {e}')
+        else:
+            form = GuestRegistrationForm()
+    else:
+        form = GuestRegistrationForm()
+
+    return render(response, 'main/home.html', {'form': form, 'username': response.user})
 
 
 def job_list(response):
@@ -184,9 +229,10 @@ def keywords(response):
             elif update_form.is_valid():
                 keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
                 jobs = ScrapedJobs.objects.get(name=username).job_set.all()
+                flag_link = update_form.cleaned_data.get("ckbx")
                 for job in jobs:
                     for keyword in keywords_list:
-                        if keyword.keyword in job.title.lower() or keyword.keyword in job.link.lower():
+                        if keyword.keyword in job.title.lower() or (flag_link and keyword.keyword in job.link.lower()):
                             ScrapedJobs.objects.get(name=username).job_set.filter(link=job.link).delete()
 
         keywords_list = JobsFilters.objects.get(name=username).keyword_set.all()
