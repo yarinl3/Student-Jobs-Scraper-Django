@@ -6,10 +6,10 @@ __author__ = 'Yarin Levi <yarinl330@gmail.com>'
 
 from bs4 import BeautifulSoup
 import requests
-from main.models import ScrapedJobs
+from main.helper import add_job
 
 
-def alljobs(user):
+def alljobs(username):
     url = 'https://www.alljobs.co.il/SearchResultsGuest.aspx?position=1449,1747&type=&source=783&duration=60'
 
     # Extract cookie from first load
@@ -35,10 +35,4 @@ def alljobs(user):
                     job_title = a['title']
                     jobs.append((job_link, job_title))
         page += 1
-
-    t = ScrapedJobs.objects
-    if len(t.filter(name=user)) == 1:
-        t = t.get(name=user)
-        for job in jobs:
-            if len(t.job_set.filter(link=job[0])) == 0:
-                t.job_set.create(title=job[1], link=job[0], sent=False, deleted=False)
+    add_job(jobs, username)

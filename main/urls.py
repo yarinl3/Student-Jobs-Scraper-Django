@@ -6,6 +6,6 @@ urlpatterns = [
     path('job_list/', views.job_list, name='job_list'),
     path('wishlist/', views.wishlist, name='wishlist'),
     path('sent/', views.sent, name='sent'),
-    path('scrap/', views.scrap, name='scrap'),
+    path('scrap/', views.pre_scrap, name='scrap'),
     path('keywords/', views.keywords, name='keywords'),
 ]

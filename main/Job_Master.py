@@ -6,10 +6,10 @@ __author__ = 'Yarin Levi <yarinl330@gmail.com>'
 
 from bs4 import BeautifulSoup
 import requests
-from main.models import ScrapedJobs
+from main.helper import add_job
 
 
-def jobmaster(user):
+def jobmaster(username):
     page = 1
     jobs = []
     while True:
@@ -30,10 +30,4 @@ def jobmaster(user):
                 job_link = ''
             job_title = article.find('div', {'class': 'CardHeader'}).text
             jobs.append((job_link, job_title))
-
-    t = ScrapedJobs.objects
-    if len(t.filter(name=user)) == 1:
-        t = t.get(name=user)
-        for job in jobs:
-            if len(t.job_set.filter(link=job[0])) == 0:
-                t.job_set.create(title=job[1], link=job[0], sent=False, deleted=False)
+    add_job(jobs, username)

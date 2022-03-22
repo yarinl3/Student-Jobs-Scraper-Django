@@ -88,8 +88,8 @@
         {% csrf_token %}
                  {% for keyword in keywords%}
                     <div class="btn-group" style="margin-bottom: 20px;" role="group">
-                        <button class="btn btn-secondary keyword">{{keyword}}</button>
-                        <button type="submit" class="btn btn-danger mr-2" name="delete" onclick="this.value='{{keyword}}'">X</button>
+                        <button class="btn btn-secondary keyword">{{keyword.keyword}}</button>
+                        <button type="submit" class="btn btn-danger mr-2" name="delete" onclick="this.value='{{keyword.keyword|escapejs}}'">X</button>
                     </div>
                 {% endfor %}
     </form>

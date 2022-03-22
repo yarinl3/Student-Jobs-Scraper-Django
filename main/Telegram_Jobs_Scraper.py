@@ -5,10 +5,10 @@ __version__ = '1.0.1'
 __author__ = 'Yarin Levi <yarinl330@gmail.com>'
 
 import json
-from main.models import ScrapedJobs
+from main.helper import add_job
 
 
-def telegram_jobs(user, *args):
+def telegram_jobs(username, *args):
     try:
         blocked_job_locations = [i.replace('\n', '') for i in
                                  open('Jobs files/blocked_job_location.txt', encoding='utf-8').readlines()]
@@ -21,13 +21,7 @@ def telegram_jobs(user, *args):
     if error_flag is True:
         return 'Failed to load telegram json file.'
     filtered_jobs = make_filtered_job_list(unfiltered_jobs, blocked_job_locations)
-
-    t = ScrapedJobs.objects
-    if len(t.filter(name=user)) == 1:
-        t = t.get(name=user)
-        for job in filtered_jobs:
-            if len(t.job_set.filter(link=job[0])) == 0:
-                t.job_set.create(title=job[1], link=job[0], sent=False, deleted=False)
+    add_job(filtered_jobs, username)
 
 
 # Creates a list that contains all jobs for students:

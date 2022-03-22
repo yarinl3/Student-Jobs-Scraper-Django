@@ -29,10 +29,9 @@
                <label class="col-sm-4 custom-file-label" for="upload">Choose telegram json file</label>
            </div>
        </div>
-        <div class="input-group">
-            <button type="submit" name="save" class="btn btn-success">Scrap</button>
-            <span class="badge badge-warning p-3" style="color: black">Warning: your last scrap will be replaced.</span>
-        </div>
+        <button type="submit" name="save" class="btn btn-success" style="margin-right: 30px">Scrap</button>
+        <button type="submit" name="reset" class="btn btn-danger"
+                onclick="return confirm('Are you sure you want to reset all deleted jobs?')">Reset deleted jobs</button>
         <p>
             {% for error in errors %}
                 {% if 'successfully' in error %}
