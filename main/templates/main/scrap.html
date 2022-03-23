@@ -22,16 +22,9 @@
 
     <form method="POST" action="#" class="form-group" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form|crispy }}
-       <div class="input-group mb-3">
-           <div class="custom-file">
-               <input type="file" class="custom-file-input" id="upload" name="upload" accept="application/JSON">
-               <label class="col-sm-4 custom-file-label" for="upload">Choose telegram json file</label>
-           </div>
+        <div style="text-align: left">
+            {% crispy form %}
        </div>
-        <button type="submit" name="save" class="btn btn-success" style="margin-right: 30px">Scrap</button>
-        <button type="submit" name="reset" class="btn btn-danger"
-                onclick="return confirm('Are you sure you want to reset all deleted jobs?')">Reset deleted jobs</button>
         <p>
             {% for error in errors %}
                 {% if 'successfully' in error %}

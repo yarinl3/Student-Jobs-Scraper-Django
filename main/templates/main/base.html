@@ -11,12 +11,26 @@
     <!-- <link rel="stylesheet" href="mystyle.css"> -->
     <style type="text/css">
         .main {
-            margin-left: 160px;
+            display: flex;
+            justify-content: center;
             padding: 0px 10px;
         }
         .center-page{
             text-align: center;
-            vertical-align: middle;
+            display: flex;
+            justify-content: center;
+        }
+        .upload-div{
+            position: relative;
+            overflow: hidden;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .upload-input{
+            position: absolute;
+            right: 0;
+            top: 0;
+            opacity: 0
         }
         .hebrew{
             direction: rtl;
@@ -78,14 +92,12 @@
 </nav>
 <div id="top"></div>
 <div id="content" name="content" class="main">
-    <div class="row justify-content-center">
-        <div class="col-8">
+    <div class="row center-page">
+        <div class="col">
             <h1 class="mt-2">{%block page_name %}Student Job Scraper{% endblock %}</h1>
             <hr class="mt-0 mb-4">
-            <div class="center-page">
                 {%block content %}
                 {% endblock %}
-            </div>
         </div>
     </div>
 </div>

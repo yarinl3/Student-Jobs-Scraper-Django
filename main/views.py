@@ -1,6 +1,4 @@
-import random
-import time
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -8,6 +6,8 @@ from .forms import *
 from .Student_Jobs import jobs_scrap
 from .models import *
 from threading import Thread
+import random
+import time
 CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
 TIMEOUT = 25
 
@@ -48,6 +48,8 @@ def home(response):
                     finally:
                         if user is not None:
                             login(response, user)
+    else:
+        return redirect('/scraped_list')
     return render(response, 'main/home.html', {'form': form, 'username': response.user})
 
 
@@ -111,8 +113,8 @@ def pre_scrap(response):
                     checked_list = [key for key in res if key in CHECKBOXLIST and res.get(key) == 'on']
 
                     def scrap(checkbox):
-                        if checkbox == 'telegram_jobs' and 'upload' in response.FILES:
-                            error_flag, error_value = jobs_scrap(checkbox, username, response.FILES['upload'])
+                        if checkbox == 'telegram_jobs' and 'upload_json' in response.FILES:
+                            error_flag, error_value = jobs_scrap(checkbox, username, response.FILES['upload_json'])
                         else:
                             error_flag, error_value = jobs_scrap(checkbox, username)
 
