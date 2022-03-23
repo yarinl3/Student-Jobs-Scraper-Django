@@ -59,13 +59,14 @@ def same_code(response, page_name):
             if form.is_valid():
                 link = form.cleaned_data.get("link")
                 val = form.cleaned_data.get("btn")
+                print(form)
                 user_job = Job.objects.get(link=link).userjobs_set.filter(username=username)
                 if val == 'Delete':
                     user_job.update(sent=False, scraped=False, wishlist=False, deleted=True)
-                if page_name == 'job_list':
+                if page_name == 'scraped_list':
                     if val == 'Add to Wishlist':
                         user_job.update(sent=False, scraped=False, wishlist=True, deleted=False)
-                if page_name in ['job_list', 'wishlist']:
+                if page_name in ['scraped_list', 'wishlist']:
                     if val == 'Add to Sent':
                         user_job.update(sent=True, scraped=False, wishlist=False, deleted=False)
         else:
@@ -74,7 +75,7 @@ def same_code(response, page_name):
         jobs = Job.objects.all()
         for job in jobs:
             if len(job.userjobs_set.filter(username=username, sent=(page_name == 'sent'),
-                                           scraped=(page_name == 'job_list'), wishlist=(page_name == 'wishlist'),
+                                           scraped=(page_name == 'scraped_list'), wishlist=(page_name == 'wishlist'),
                                            deleted=False)) != 0:
                 new_jobs.append(job)
         return render(response, f'main/{page_name}.html', {'form': form, 'jobs': new_jobs, 'username': response.user})
@@ -82,8 +83,8 @@ def same_code(response, page_name):
         raise PermissionDenied()
 
 
-def job_list(response):
-    return same_code(response, 'job_list')
+def scraped_list(response):
+    return same_code(response, 'scraped_list')
 
 
 def wishlist(response):

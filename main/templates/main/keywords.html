@@ -34,10 +34,8 @@
 
         /* Create a custom checkbox */
         .checkmark {
-          position: absolute;
-          top: 0;
-          left: 0; }
-
+          margin-right: 30px
+          }
         /* Create the checkmark/indicator (hidden when not checked) */
         .checkmark:after {
           content: "\f0c8";
@@ -53,7 +51,6 @@
 
         /* Show the checkmark when checked */
         .checkbox-wrap input:checked ~ .checkmark:after {
-          display: block;
           content: "\f14a";
           font-family: "FontAwesome";
           color: rgba(0, 0, 0, 0.2); }
@@ -105,10 +102,10 @@
     <form method="POST" action="#">
         {% csrf_token %}
         <p>
-            <label class="checkbox-wrap checkbox-primary">Look for unwanted keywords in the links. (not recommended)
+            <label class="checkbox-wrap checkbox-primary">
                 <input type="checkbox" name="ckbx" value="0">
                 <span class="checkmark"></span>
-
+                Look for unwanted keywords in the links. (not recommended)
             </label>
         </p>
         <input type="submit" name="update" class="btn btn-success" value="Update Job List">

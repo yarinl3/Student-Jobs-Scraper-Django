@@ -1,11 +1,11 @@
 {% extends 'main/base.html' %}
 
-{%block title%}Whishlist{%endblock%}
+{%block title%}Scraped List{%endblock%}
 
-{%block page_name %}Whishlist{% endblock %}
+{%block page_name %}Scraped List{% endblock %}
 
 {% block content %}
-        <h2>{{jobs|length}} jobs in your wishlist</h2>
+        <h2>{{jobs|length}} jobs found</h2>
         <table class="table table-borderless hebrew">
             <tbody>
             {% for job in jobs%}
@@ -16,12 +16,14 @@
                     <td>
                         <form method="POST" action="#">
                             {% csrf_token %}
-                            <input type="submit" name="btn" class="btn btn-primary" value="Add to Sent">
-                            <input type="submit" name="btn" class="btn btn-danger" value="Delete">
+                            <input type="submit" name="btn" class="btn btn-primary margin-right-s mb-3" value="Add to Wishlist">
+                            <input type="submit" name="btn" class="btn btn-primary margin-right-s mb-3" value="Add to Sent">
+                            <input type="submit" name="btn" class="btn btn-danger margin-right-s mb-3" value="Delete">
                             <input type="hidden" name="link" value="{{job.link}}">
                         </form>
                     </td>
-                </tr>
+
+              </tr>
             {% endfor %}
             </tbody>
         </table>

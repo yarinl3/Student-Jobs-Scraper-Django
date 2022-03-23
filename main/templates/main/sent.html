@@ -5,27 +5,24 @@
 {%block page_name %}Sent{% endblock %}
 
 {% block content %}
-    <h2 style="text-align: center;">{{jobs|length}} jobs sent</h2></br>
-    <div class="job-list">
-        <table class="table table-borderless">
+        <h2>{{jobs|length}} jobs sent</h2>
+        <table class="table table-borderless hebrew">
             <tbody>
             {% for job in jobs%}
               <tr>
-                <td>
-                    <form method="POST" action="#">
-                        {% csrf_token %}
-                        <input type="submit" name="btn" class="btn btn-danger" value="Delete">
-                        <input type="hidden" name="link" value="{{job.link}}">
-                    </form>
-                </td>
-                <td>
-                    <a href={{job.link}} target="_blank" rel="noopener noreferrer">{{job.title}}</a>
-                </td>
-              </tr>
+                  <td>
+                      <a href={{job.link}} target="_blank" rel="noopener noreferrer">{{job.title}}</a>
+                  </td>
+                  <td>
+                      <form method="POST" action="#">
+                          {% csrf_token %}
+                          <input type="submit" name="btn" class="btn btn-danger" value="Delete">
+                          <input type="hidden" name="link" value="{{job.link}}">
+                      </form>
+                  </td>
               </tr>
             {% endfor %}
             </tbody>
         </table>
-    </div>
 {% endblock %}
 
