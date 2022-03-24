@@ -2,12 +2,16 @@ from django.shortcuts import render, redirect
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from mysite.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
 from .forms import *
-from .Student_Jobs import jobs_scrap
+from .Student_Jobs import jobs_scrape
 from .models import *
 from threading import Thread
 import random
 import time
+import boto3
+from boto3.session import Session
+
 CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
 TIMEOUT = 25
 
@@ -48,6 +52,7 @@ def home(response):
                     finally:
                         if user is not None:
                             login(response, user)
+                            return redirect('/scraped_list')
     else:
         return redirect('/scraped_list')
     return render(response, 'main/home.html', {'form': form, 'username': response.user})
@@ -61,8 +66,7 @@ def same_code(response, page_name):
             if form.is_valid():
                 link = form.cleaned_data.get("link")
                 val = form.cleaned_data.get("btn")
-                print(form)
-                user_job = Job.objects.get(link=link).userjobs_set.filter(username=username)
+                user_job = Job.objects.filter(link=link)[0].userjobs_set.filter(username=username)
                 if val == 'Delete':
                     user_job.update(sent=False, scraped=False, wishlist=False, deleted=True)
                 if page_name == 'scraped_list':
@@ -97,33 +101,39 @@ def sent(response):
     return same_code(response, 'sent')
 
 
-def pre_scrap(response):
+def pre_scrape(response):
     global TIMEOUT
-    scrap_start_time = time.time()
+    scrape_start_time = time.time()
     if response.user.is_anonymous is False:
         errors = []
         threads = []
         username = str(response.user)
-        form = ScrapForm()
+        form = ScrapeForm()
         if response.method == "POST":
-            form = ScrapForm(response.POST)
+            form = ScrapeForm(response.POST)
             if 'save' in response.POST:
                 if form.is_valid():
                     res = response.POST
                     checked_list = [key for key in res if key in CHECKBOXLIST and res.get(key) == 'on']
+                    if 'upload_json' in response.FILES and 'telegram_jobs' in checked_list:
+                        num = upload_s3_file(username, response.FILES['upload_json'])
 
-                    def scrap(checkbox):
+                    def scrape(checkbox):
                         if checkbox == 'telegram_jobs' and 'upload_json' in response.FILES:
-                            error_flag, error_value = jobs_scrap(checkbox, username, response.FILES['upload_json'])
+                            if num is not None:
+                                s3_file = get_s3_file(username, num)
+                            else:
+                                errors.append(f'Failed to scrape {checkbox}.\nOnly json files can be uploaded.')
+                            error_flag, error_value = jobs_scrape(checkbox, username, s3_file)
                         else:
-                            error_flag, error_value = jobs_scrap(checkbox, username)
+                            error_flag, error_value = jobs_scrape(checkbox, username)
 
                         if error_flag is True:
                             errors.append(f'{checkbox} scraped successfully.')
                         else:
                             errors.append(error_value)
                     for checked in checked_list:
-                        t = Thread(target=scrap, args=(checked,))
+                        t = Thread(target=scrape, args=(checked,))
                         threads.append(t)
                         t.start()
                     for t in threads:
@@ -132,11 +142,11 @@ def pre_scrap(response):
                         TIMEOUT -= time.time() - start_time
                         if TIMEOUT < 0:
                             TIMEOUT = 0
-                    errors = collect_errors(checked_list, errors, scrap_start_time)
+                    errors = collect_errors(checked_list, errors, scrape_start_time)
             elif 'reset' in response.POST:
                 user_job = UserJobs.objects.filter(username=username, deleted=True)
                 user_job.update(sent=False, scraped=True, wishlist=False, deleted=False)
-        return render(response, 'main/scrap.html', {'form': form, 'errors': errors, 'username': response.user})
+        return render(response, 'main/scrape.html', {'form': form, 'errors': errors, 'username': response.user})
     else:
         raise PermissionDenied()
 
@@ -154,7 +164,7 @@ def keywords(response):
                 if keyword != '' and keyword.isspace() is False:
                     keyword_exist = len(Keyword.objects.all().filter(keyword=keyword)) != 0
                     if keyword_exist is True:
-                        old_keyword = Keyword.objects.get(keyword=keyword)
+                        old_keyword = Keyword.objects.filter(keyword=keyword)[0]
                         keyword_exist_in_others = len(old_keyword.jobsfilters_set.filter(username=username)) == 0
                         if keyword_exist_in_others is True:
                             old_keyword.jobsfilters_set.create(username=username)
@@ -165,14 +175,14 @@ def keywords(response):
 
             elif del_form.is_valid():
                 keyword = del_form.cleaned_data.get('delete').lower()
-                Keyword.objects.get(keyword=keyword).jobsfilters_set.filter(username=username).delete()
+                Keyword.objects.filter(keyword=keyword)[0].jobsfilters_set.filter(username=username).delete()
             elif update_form.is_valid():
 
                 userjobs = UserJobs.objects.filter(username=username, scraped=True)
                 checkbox = update_form.cleaned_data.get("ckbx")
                 for userjob in userjobs:
                     for keyword in keywords_list:
-                        job = Job.objects.get(id=userjob.job_id)
+                        job = Job.objects.filter(id=userjob.job_id)[0]
                         if str(keyword.keyword) in job.title.lower() or\
                                 (checkbox is True and str(keyword.keyword) in job.link.lower()):
                             UserJobs.objects.filter(username=username, job_id=job.id).update(sent=False,
@@ -185,14 +195,34 @@ def keywords(response):
         raise PermissionDenied()
 
 
-def collect_errors(checked_list, errors, scrap_start_time):
+def collect_errors(checked_list, errors, scrape_start_time):
     for site in checked_list:
         site_in_errors = False
         for error in errors:
             if site in str(error):
                 site_in_errors = True
-        if site_in_errors is False and time.time() - scrap_start_time >= 25:
+        if site_in_errors is False and time.time() - scrape_start_time >= 25:
             errors.append(f'Timeout: 25 seconds passed and the scraping did not end.\n'
                           f'If the connection to {site} is correct it will continue the scraping'
                           f' in the background. ')
     return errors
+
+
+def upload_s3_file(username, file):
+    num_list = sorted([int(file_obj.file_id) for file_obj in JsonUpload.objects.filter(username=username)])
+    try:
+        num = num_list[-1] + 1
+    except IndexError:
+        num = 1
+    if file.name.endswith('.json') is True:
+        file.name = f"{username}-{num}.json"
+        JsonUpload.objects.create(username=username, file_id=num, json_file=file)
+        return num
+
+
+def get_s3_file(username, num):
+    session = Session(aws_access_key_id=AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3 = session.resource('s3')
+    s3_file = s3.Object(AWS_STORAGE_BUCKET_NAME, f'media/{username}-{num}.json').get()['Body']
+    return s3_file

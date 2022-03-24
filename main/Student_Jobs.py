@@ -12,7 +12,7 @@ except Exception:
     pass
 
 
-def jobs_scrap(func, user, *args):
+def jobs_scrape(func, user, *args):
     funcs = {'alljobs': alljobs, 'drushim': drushim, 'jobmaster': jobmaster,
              'sqlink': sqlink, 'telegram_jobs': telegram_jobs}
     try:

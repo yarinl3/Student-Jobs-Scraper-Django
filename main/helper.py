@@ -5,7 +5,8 @@ def add_job(jobs, username):
     for job in jobs:
         job_exist = len(Job.objects.filter(link=job[0])) != 0
         if job_exist is True:
-            old_job = Job.objects.get(link=job[0])
+
+            old_job = Job.objects.filter(link=job[0])[0]
             job_exist_in_others = len(old_job.userjobs_set.filter(username=username)) == 0
             if job_exist_in_others is True:
                 old_job.userjobs_set.create(username=username, sent=False, scraped=True, wishlist=False, deleted=False)

@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Row, Div, ButtonHolder, HTML, Submit
 
 
-class ScrapForm(forms.Form):
+class ScrapeForm(forms.Form):
     all = forms.BooleanField(label='Select all', required=False)
     all.widget = forms.CheckboxInput(attrs={'onClick': "toggle(this)"})
     alljobs = forms.BooleanField(label='AllJobs', required=False)
@@ -37,7 +37,7 @@ class ScrapForm(forms.Form):
                         HTML("""
                         <button type="submit" name="save" class="btn btn-success"
                             style="margin-right: 30px; margin-top: 30px">
-                            Scrap
+                            Scrape
                         </button>
                         """)),
                     ButtonHolder(

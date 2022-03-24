@@ -37,4 +37,10 @@ class JobsFilters(models.Model):
         return self.username
 
 
+class JsonUpload(models.Model):
+    username = models.CharField(max_length=50)
+    file_id = models.CharField(max_length=20)
+    json_file = models.FileField(upload_to='media/')
 
+    def __str__(self):
+        return f'{self.username}'
