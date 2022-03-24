@@ -3,5 +3,6 @@ boto3==1.21.24
 Django==4.0.3
 django_crispy_forms==1.14.0
 django_heroku==0.3.1
+django_storages==1.12.3
 requests==2.27.1
 selenium==4.1.3

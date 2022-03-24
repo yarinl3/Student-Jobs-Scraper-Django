@@ -11,6 +11,7 @@ import random
 import time
 import boto3
 from boto3.session import Session
+import storages
 
 CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
 TIMEOUT = 25
