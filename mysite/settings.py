@@ -18,12 +18,6 @@ import django_heroku
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -138,9 +132,28 @@ LOGOUT_REDIRECT_URL = '/'
 django_heroku.settings(locals())
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET']
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+# SECURITY WARNING: keep the secret key used in production secret!
+
+try:
+    ON_TEST = os.environ['ON_TEST']
+except Exception:
+    ON_TEST = True
+
+if ON_TEST is True:
+    with open(r"C:\Users\Yarin\Desktop\Yarin\rootkey.csv") as fd:
+        AWS_ACCESS_KEY_ID = fd.readline()[18:].rstrip()
+        AWS_SECRET_ACCESS_KEY = fd.readline()[22:].rstrip()
+        AWS_STORAGE_BUCKET_NAME = fd.readline()[24:].rstrip()
+        SECRET_KEY = fd.readline()[11:].rstrip()
+else:
+    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+    AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET']
+    SECRET_KEY = os.environ['SECRET_KEY']
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = False

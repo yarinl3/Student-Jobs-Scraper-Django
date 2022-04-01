@@ -16,7 +16,7 @@ from boto3.session import Session
 import storages
 import gunicorn
 
-CHECKBOXLIST = ['alljobs', 'drushim', 'jobmaster', 'sqlink', 'telegram_jobs']
+CHECKBOX_LIST = ["alljobs", "drushim", "jobmaster", "sqlink", "telegram_jobs"]  # noqa
 TIMEOUT = 25
 
 
@@ -32,23 +32,30 @@ def home(response):
                     try:
                         while True:
                             username = f'guest-{random.randint(1,100000)}'
-                            if len(UserJobs.objects.all().filter(username=username)) == 0 and\
-                                    len(JobsFilters.objects.all().filter(username=username)) == 0:
-                                user = User.objects.create_user(username, password='12345')
+                            if len(User.objects.filter(username=username)) == 0:
+                                user = User.objects.create_user(username=username, password='12345')
                                 user.is_superuser = False
                                 user.is_staff = False
                                 user.save()
                                 break
-                        for job in Job.objects.all():
-                            if len(job.userjobs_set.filter(username='guest-1')) != 0:
-                                guest1 = job.userjobs_set.get(username='guest-1')
-                                job.userjobs_set.create(username=username, sent=guest1.sent, scraped=guest1.scraped,
-                                                        wishlist=guest1.wishlist, deleted=guest1.deleted)
 
-                        for keyword in Keyword.objects.all():
-                            if len(keyword.jobsfilters_set.filter(username='guest-1')) != 0:
-                                guest1 = keyword.jobsfilters_set.get(username='guest-1')
-                                keyword.jobsfilters_set.create(username=username, keyword=guest1.keyword)
+                        user = User.objects.get(username=username)
+                        guest1_filter = User.objects.filter(username='guest-1')
+                        guest1 = guest1_filter[0] if len(guest1_filter) > 0 else None
+                        if guest1 is not None:
+                            for job in Job.objects.all():
+                                if len(job.userjobs_set.filter(username=guest1)) != 0:
+                                    guest1_userjob = job.userjobs_set.get(username=guest1)
+                                    job.userjobs_set.create(username=user,
+                                                            sent=guest1_userjob.sent,
+                                                            scraped=guest1_userjob.scraped,
+                                                            wishlist=guest1_userjob.wishlist,
+                                                            deleted=guest1_userjob.deleted)
+
+                            for keyword in Keyword.objects.all():
+                                if len(keyword.jobsfilters_set.filter(username=guest1)) != 0:
+                                    guest1_jobfilters = keyword.jobsfilters_set.get(username=guest1)
+                                    keyword.jobsfilters_set.create(username=user, keyword=guest1_jobfilters.keyword)
 
                     except Exception as e:
                         print(f'Error in views.home, username = {username}, Error: {e}')
@@ -64,13 +71,13 @@ def home(response):
 
 def same_code(response, page_name):
     if response.user.is_anonymous is False:
-        username = str(response.user)
+        user = response.user
         if response.method == "POST":
             form = JobsListFrom(response.POST)
             if form.is_valid():
                 link = form.cleaned_data.get("link")
                 val = form.cleaned_data.get("btn")
-                user_job = Job.objects.filter(link=link)[0].userjobs_set.filter(username=username)
+                user_job = Job.objects.filter(link=link)[0].userjobs_set.filter(username=user)
                 if val == 'Delete':
                     user_job.update(sent=False, scraped=False, wishlist=False, deleted=True)
                 if page_name == 'scraped_list':
@@ -84,11 +91,11 @@ def same_code(response, page_name):
         new_jobs = []
         jobs = Job.objects.all()
         for job in jobs:
-            if len(job.userjobs_set.filter(username=username, sent=(page_name == 'sent'),
+            if len(job.userjobs_set.filter(username=user, sent=(page_name == 'sent'),
                                            scraped=(page_name == 'scraped_list'), wishlist=(page_name == 'wishlist'),
                                            deleted=False)) != 0:
                 new_jobs.append(job)
-        return render(response, f'main/{page_name}.html', {'form': form, 'jobs': new_jobs, 'username': response.user})
+        return render(response, f'main/{page_name}.html', {'form': form, 'jobs': new_jobs, 'username': user})
     else:
         raise PermissionDenied()
 
@@ -111,26 +118,25 @@ def pre_scrape(response):
     if response.user.is_anonymous is False:
         errors = []
         threads = []
-        username = str(response.user)
+        user = response.user
         form = ScrapeForm()
         if response.method == "POST":
             form = ScrapeForm(response.POST)
             if 'save' in response.POST:
                 if form.is_valid():
                     res = response.POST
-                    checked_list = [key for key in res if key in CHECKBOXLIST and res.get(key) == 'on']
-                    if 'upload_json' in response.FILES and 'telegram_jobs' in checked_list:
-                        num = upload_s3_file(username, response.FILES['upload_json'])
+                    checked_list = [key for key in res if key in CHECKBOX_LIST and res.get(key) == 'on']
 
                     def scrape(checkbox):
                         if checkbox == 'telegram_jobs' and 'upload_json' in response.FILES:
+                            num = upload_s3_file(user, response.FILES['upload_json'])
                             if num is not None:
-                                s3_file = get_s3_file(username, num)
+                                s3_file = get_s3_file(user, num)
                             else:
                                 errors.append(f'Failed to scrape {checkbox}.\nOnly json files can be uploaded.')
-                            error_flag, error_value = jobs_scrape(checkbox, username, s3_file)
+                            error_flag, error_value = jobs_scrape(checkbox, user, s3_file)
                         else:
-                            error_flag, error_value = jobs_scrape(checkbox, username)
+                            error_flag, error_value = jobs_scrape(checkbox, user)
 
                         if error_flag is True:
                             errors.append(f'{checkbox} scraped successfully.')
@@ -148,20 +154,21 @@ def pre_scrape(response):
                             TIMEOUT = 0
                     errors = collect_errors(checked_list, errors, scrape_start_time)
             elif 'reset' in response.POST:
-                user_job = UserJobs.objects.filter(username=username, deleted=True)
+                user_job = UserJobs.objects.filter(username=user, deleted=True)
                 user_job.update(sent=False, scraped=True, wishlist=False, deleted=False)
-        return render(response, 'main/scrape.html', {'form': form, 'errors': errors, 'username': response.user})
+        return render(response, 'main/scrape.html', {'form': form, 'errors': errors, 'username': user,
+                                                     'sites': CHECKBOX_LIST})
     else:
         raise PermissionDenied()
 
 
 def keywords(response):
     if response.user.is_anonymous is False:
-        username = str(response.user)
+        user = response.user
         add_form = AddKeywordForm(response.POST)
         del_form = DeleteKeywordForm(response.POST)
         update_form = UpdateKeywordForm(response.POST)
-        keywords_list = JobsFilters.objects.filter(username=username)
+        keywords_list = JobsFilters.objects.filter(username=user)
         if response.method == "POST":
             if add_form.is_valid():
                 keyword = add_form.cleaned_data.get('keyword').lower()
@@ -169,32 +176,32 @@ def keywords(response):
                     keyword_exist = len(Keyword.objects.all().filter(keyword=keyword)) != 0
                     if keyword_exist is True:
                         old_keyword = Keyword.objects.filter(keyword=keyword)[0]
-                        keyword_exist_in_others = len(old_keyword.jobsfilters_set.filter(username=username)) == 0
+                        keyword_exist_in_others = len(old_keyword.jobsfilters_set.filter(username=user)) == 0
                         if keyword_exist_in_others is True:
-                            old_keyword.jobsfilters_set.create(username=username)
+                            old_keyword.jobsfilters_set.create(username=user)
                     else:
                         new_keyword = Keyword(keyword=keyword)
                         new_keyword.save()
-                        new_keyword.jobsfilters_set.create(username=username)
+                        new_keyword.jobsfilters_set.create(username=user)
 
             elif del_form.is_valid():
                 keyword = del_form.cleaned_data.get('delete').lower()
-                Keyword.objects.filter(keyword=keyword)[0].jobsfilters_set.filter(username=username).delete()
+                Keyword.objects.filter(keyword=keyword)[0].jobsfilters_set.filter(username=user).delete()
             elif update_form.is_valid():
 
-                userjobs = UserJobs.objects.filter(username=username, scraped=True)
+                userjobs = UserJobs.objects.filter(username=user, scraped=True)
                 checkbox = update_form.cleaned_data.get("ckbx")
                 for userjob in userjobs:
                     for keyword in keywords_list:
                         job = Job.objects.filter(id=userjob.job_id)[0]
                         if str(keyword.keyword) in job.title.lower() or\
                                 (checkbox is True and str(keyword.keyword) in job.link.lower()):
-                            UserJobs.objects.filter(username=username, job_id=job.id).update(sent=False,
-                                                                                             scraped=False,
-                                                                                             wishlist=False,
-                                                                                             deleted=True)
+                            UserJobs.objects.filter(username=user, job_id=job.id).update(sent=False,
+                                                                                         scraped=False,
+                                                                                         wishlist=False,
+                                                                                         deleted=True)
         return render(response, 'main/keywords.html', {'form': add_form, 'keywords': keywords_list,
-                                                       'username': response.user})
+                                                       'username': user})
     else:
         raise PermissionDenied()
 
@@ -212,21 +219,21 @@ def collect_errors(checked_list, errors, scrape_start_time):
     return errors
 
 
-def upload_s3_file(username, file):
-    num_list = sorted([int(file_obj.file_id) for file_obj in JsonUpload.objects.filter(username=username)])
+def upload_s3_file(user, file):
+    num_list = sorted([int(file_obj.file_id) for file_obj in JsonUpload.objects.filter(username=user)])
     try:
         num = num_list[-1] + 1
     except IndexError:
         num = 1
     if file.name.endswith('.json') is True:
-        file.name = f"{username}-{num}.json"
-        JsonUpload.objects.create(username=username, file_id=num, json_file=file)
+        file.name = f"{user}-{num}.json"
+        JsonUpload.objects.create(username=user, file_id=num, json_file=file)
         return num
 
 
-def get_s3_file(username, num):
+def get_s3_file(user, num):
     session = Session(aws_access_key_id=AWS_ACCESS_KEY_ID,
                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     s3 = session.resource('s3')
-    s3_file = s3.Object(AWS_STORAGE_BUCKET_NAME, f'media/{username}-{num}.json').get()['Body']
+    s3_file = s3.Object(AWS_STORAGE_BUCKET_NAME, f'media/{user}-{num}.json').get()['Body']
     return s3_file

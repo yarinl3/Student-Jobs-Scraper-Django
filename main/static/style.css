@@ -1,0 +1,108 @@
+.main {
+    display: flex;
+    justify-content: center;
+    padding: 0px 10px;
+}
+
+.center-page{
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.upload-div{
+    position: relative;
+    overflow: hidden;
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+.upload-input{
+    position: absolute;
+    right: 0;
+    top: 0;
+    opacity: 0
+}
+
+.hebrew{
+    direction: rtl;
+}
+
+.keyword{
+    pointer-events: none;
+    display: inline-block;
+}
+
+.dropdown-menu{
+    background-color: #9f9f9f;
+}
+
+.checkbox-wrap {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none; }
+
+/* Hide the browser's default checkbox */
+.checkbox-wrap input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0; }
+
+/* Create a custom checkbox */
+.checkmark {
+    margin-right: 30px
+}
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+    content: "\f0c8";
+    font-family: "FontAwesome";
+    position: absolute;
+    color: rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    margin-top: -4px;
+    -webkit-transition: 0.3s;
+    -o-transition: 0.3s;
+    transition: 0.3s; }
+
+
+/* Show the checkmark when checked */
+.checkbox-wrap input:checked ~ .checkmark:after {
+    content: "\f14a";
+    font-family: "FontAwesome";
+    color: rgba(0, 0, 0, 0.2); }
+
+/* Style the checkmark/indicator */
+.checkbox-primary {
+    color: #0075f6; }
+.checkbox-primary input:checked ~ .checkmark:after {
+    color: #0075f6; }
+
+.checkbox-danger {
+    color: #dc3545; }
+.checkbox-danger input:checked ~ .checkmark:after {
+    color: #dc3545; }
+
+.checkbox-info {
+    color: #17a2b8; }
+.checkbox-info input:checked ~ .checkmark:after {
+    color: #17a2b8; }
+
+.checkbox-warning {
+    color: #ffc107; }
+.checkbox-warning input:checked ~ .checkmark:after {
+    color: #ffc107; }
+
+.checkbox-success {
+    color: #28a745; }
+.checkbox-success input:checked ~ .checkmark:after {
+    color: #28a745; }
