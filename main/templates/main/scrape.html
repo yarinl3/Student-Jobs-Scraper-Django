@@ -9,7 +9,7 @@
 <script type="text/javascript">
     function toggle(source) {
         let jobs_sites = JSON.parse(document.getElementById('sites').value.replaceAll("\'","\""));
-        for(let j=0; j<5; j++){
+        for(let j=0; j<jobs_sites.length; j++){
             let checkboxes = document.getElementsByName(jobs_sites[j]);
             for(let i=0, n=checkboxes.length;i<n;i++) {
                 checkboxes[i].checked = source.checked;
