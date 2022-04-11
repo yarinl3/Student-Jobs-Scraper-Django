@@ -10,6 +10,7 @@ class ScrapeForm(forms.Form):
     drushim = forms.BooleanField(label='Drushim', required=False)
     jobmaster = forms.BooleanField(label='Job Master', required=False)
     sqlink = forms.BooleanField(label='Sqlink', required=False)
+    jobnet = forms.BooleanField(label='Jobnet', required=False)
     telegram_jobs = forms.BooleanField(label='Telegram', required=False)
 
     def __init__(self, *args, **kwargs):
@@ -23,6 +24,7 @@ class ScrapeForm(forms.Form):
                 'drushim',
                 'jobmaster',
                 'sqlink',
+                'jobnet',
                 Row('telegram_jobs',
                     ButtonHolder(
                         HTML("""

@@ -16,7 +16,7 @@ from boto3.session import Session
 import storages
 import gunicorn
 
-CHECKBOX_LIST = ["alljobs", "drushim", "jobmaster", "sqlink", "telegram_jobs"]  # noqa
+CHECKBOX_LIST = ["alljobs", "drushim", "jobmaster", "sqlink", "telegram_jobs", "jobnet"]  # noqa
 TIMEOUT = 25
 
 
