@@ -210,6 +210,7 @@ def keywords(response):
                                                                                      scraped=False,
                                                                                      wishlist=False,
                                                                                      deleted=True)
+        keywords_list = set([str(i.keyword) for i in JobsFilters.objects.filter(username=user)])
         return render(response, 'main/keywords.html', {'form': add_form, 'keywords': keywords_list,
                                                        'username': user})
     else:
