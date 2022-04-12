@@ -168,7 +168,7 @@ def keywords(response):
         add_form = AddKeywordForm(response.POST)
         del_form = DeleteKeywordForm(response.POST)
         update_form = UpdateKeywordForm(response.POST)
-        keywords_list = JobsFilters.objects.filter(username=user)
+        keywords_list = set([str(i.keyword) for i in JobsFilters.objects.filter(username=user)])
         if response.method == "POST":
             if add_form.is_valid():
                 keyword = add_form.cleaned_data.get('keyword').lower()
@@ -192,14 +192,24 @@ def keywords(response):
                 userjobs = UserJobs.objects.filter(username=user, scraped=True)
                 checkbox = update_form.cleaned_data.get("ckbx")
                 for userjob in userjobs:
-                    for keyword in keywords_list:
-                        job = Job.objects.filter(id=userjob.job_id)[0]
-                        if str(keyword.keyword) in job.title.lower() or\
-                                (checkbox is True and str(keyword.keyword) in job.link.lower()):
-                            UserJobs.objects.filter(username=user, job_id=job.id).update(sent=False,
-                                                                                         scraped=False,
-                                                                                         wishlist=False,
-                                                                                         deleted=True)
+                    job = Job.objects.filter(id=userjob.job_id)[0]
+                    link = job.link.lower()
+                    words = job.title.lower().split(' ')
+                    flag = False
+                    for word in words:
+                        if word in keywords_list:
+                            flag = True
+                            break
+                    if checkbox is True:
+                        for keyword in keywords_list:
+                            if keyword in link:
+                                flag = True
+                                break
+                    if flag is True:
+                        UserJobs.objects.filter(username=user, job_id=job.id).update(sent=False,
+                                                                                     scraped=False,
+                                                                                     wishlist=False,
+                                                                                     deleted=True)
         return render(response, 'main/keywords.html', {'form': add_form, 'keywords': keywords_list,
                                                        'username': user})
     else:
