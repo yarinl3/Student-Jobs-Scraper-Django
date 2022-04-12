@@ -188,7 +188,7 @@ def keywords(response):
                 keyword = del_form.cleaned_data.get('delete').lower()
                 Keyword.objects.filter(keyword=keyword)[0].jobsfilters_set.filter(username=user).delete()
             elif update_form.is_valid():
-
+                jobs_id = []
                 userjobs = UserJobs.objects.filter(username=user, scraped=True)
                 checkbox = update_form.cleaned_data.get("ckbx")
                 for userjob in userjobs:
@@ -206,10 +206,12 @@ def keywords(response):
                                 flag = True
                                 break
                     if flag is True:
-                        UserJobs.objects.filter(username=user, job_id=job.id).update(sent=False,
-                                                                                     scraped=False,
-                                                                                     wishlist=False,
-                                                                                     deleted=True)
+                        jobs_id.append(job.id)
+
+                UserJobs.objects.filter(username=user, job_id__in=jobs_id).update(sent=False,
+                                                                                  scraped=False,
+                                                                                  wishlist=False,
+                                                                                  deleted=True)
         keywords_list = set([str(i.keyword) for i in JobsFilters.objects.filter(username=user)])
         return render(response, 'main/keywords.html', {'form': add_form, 'keywords': keywords_list,
                                                        'username': user})
