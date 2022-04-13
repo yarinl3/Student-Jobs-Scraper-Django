@@ -17,7 +17,11 @@ def indeed(username):
     url = f'https://il.indeed.com/jobs?q=מדעי המחשב "סטודנט"&l=חולון, מחוז תל אביב&radius=25&limit=50&start=0'
     req = requests.get(url, headers=headers, verify=False).content.decode('utf-8')
     soup = BeautifulSoup(req, 'html.parser')
-    number_of_jobs = soup.find('div', {'id': 'searchCountPages'}).text.split()[3]
+    try:
+        number_of_jobs = soup.find('div', {'id': 'searchCountPages'}).text.split()[3]
+    except Exception as e:
+        print(soup.prettify())
+        raise e
     try:
         number_of_jobs = int(number_of_jobs)
     except Exception as e:
