@@ -31,5 +31,3 @@ def mploy(username):
         if break_flag is False:
             break
     add_job(jobs, username)
-    for job in jobs:
-        print(f'{job[1]}\n{job[0]}\n')

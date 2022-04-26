@@ -21,7 +21,7 @@ def indeed(username):
         number_of_jobs = soup.find('div', {'id': 'searchCountPages'}).text.split()[3]
     except Exception as e:
         print(soup.prettify())
-        raise Exception("Blocked by Captcha")
+        raise Exception("Indeed scrape blocked by CAPTCHA")
     try:
         number_of_jobs = int(number_of_jobs)
     except Exception as e:
