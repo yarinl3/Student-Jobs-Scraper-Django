@@ -1,0 +1,14 @@
+{
+    "appName": {
+        "message": "VPN Unlimited® Proxy - Лучший VPN для Chrome"
+    },
+    "appDesc": {
+        "message": "VPN Unlimited - надежное, быстрое и простое в использовании VPN расширение для браузера Chrome"
+    },
+    "title": {
+        "message": "VPN Unlimited Browser extension"
+    },
+    "proxy_helper_options" : {
+        "message": "VPN Unlimited Options"
+    }
+}

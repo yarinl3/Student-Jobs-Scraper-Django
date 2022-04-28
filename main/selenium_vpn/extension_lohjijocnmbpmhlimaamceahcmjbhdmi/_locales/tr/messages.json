@@ -1,0 +1,14 @@
+{
+    "appName": {
+        "message": "VPN Unlimited Proxy en iyisi Chrome için VPN"
+    },
+    "appDesc": {
+        "message": "VPN Unlimited - Chrome tarayıcı için güvenilir, kullanımı kolay, ve ışık hızında VPN eklentisi"
+    },
+    "title": {
+        "message": "VPN Unlimited Taray?c? Uzant?s?"
+    },
+    "proxy_helper_options" : {
+        "message": "VPN Unlimited Options"
+    }
+}
