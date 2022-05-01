@@ -16,8 +16,6 @@ from boto3.session import Session
 import storages
 import gunicorn
 
-CHECKBOX_LIST = ["alljobs", "drushim", "jobmaster", "sqlink", "telegram_jobs", "jobnet", "indeed", "mploy",
-                 "nisha", "job_karov"]  # noqa
 TIMEOUT = 25
 
 
@@ -126,7 +124,7 @@ def pre_scrape(response):
             if 'save' in response.POST:
                 if form.is_valid():
                     res = response.POST
-                    checked_list = [key for key in res if key in CHECKBOX_LIST and res.get(key) == 'on']
+                    checked_list = [key for key in res if key in SITES.keys() and res.get(key) == 'on']
 
                     def scrape(checkbox):
                         if checkbox == 'telegram_jobs' and 'upload_json' in response.FILES:
@@ -158,7 +156,7 @@ def pre_scrape(response):
                 user_job = UserJobs.objects.filter(username=user, deleted=True)
                 user_job.update(sent=False, scraped=True, wishlist=False, deleted=False)
         return render(response, 'main/scrape.html', {'form': form, 'errors': errors, 'username': user,
-                                                     'sites': CHECKBOX_LIST})
+                                                     'sites': list(SITES.keys())})
     else:
         raise PermissionDenied()
 

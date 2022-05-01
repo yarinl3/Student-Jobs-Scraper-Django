@@ -2,20 +2,18 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Row, Div, ButtonHolder, HTML, Submit
 
+# func_name: [button_name, file_name]
+SITES = {'alljobs': ['AllJobs', 'AllJobs_Scraper'], 'drushim': ['Drushim', 'Drushim_Jobs'],
+         'jobmaster': ['Job Master', 'Job_Master'], 'sqlink': ['Sqlink', 'Sqlink_Jobs'], 'jobnet': ['Jobnet', 'Jobnet'],
+         'indeed': ['Indeed', 'Indeed_Jobs'], 'mploy': ['Mploy', 'Mploy'], 'nisha': ['Nisha', 'Nisha'],
+         'telegram_jobs': ['Telegram', 'Telegram_Jobs_Scraper']}
+
 
 class ScrapeForm(forms.Form):
     all = forms.BooleanField(label='Select all', required=False)
     all.widget = forms.CheckboxInput(attrs={'onClick': "toggle(this)"})
-    alljobs = forms.BooleanField(label='AllJobs', required=False)
-    drushim = forms.BooleanField(label='Drushim', required=False)
-    jobmaster = forms.BooleanField(label='Job Master', required=False)
-    sqlink = forms.BooleanField(label='Sqlink', required=False)
-    jobnet = forms.BooleanField(label='Jobnet', required=False)
-    indeed = forms.BooleanField(label='Indeed', required=False)
-    mploy = forms.BooleanField(label='Mploy', required=False)
-    nisha = forms.BooleanField(label='Nisha', required=False)
-    job_karov = forms.BooleanField(label='Job Karov', required=False)
-    telegram_jobs = forms.BooleanField(label='Telegram', required=False)
+    for site in SITES:
+        exec(f'{site} = forms.BooleanField(label="{SITES[site][0]}", required=False)')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,15 +22,7 @@ class ScrapeForm(forms.Form):
             Fieldset(
                 '',
                 'all',
-                'alljobs',
-                'drushim',
-                'jobmaster',
-                'sqlink',
-                'jobnet',
-                'indeed',
-                'mploy',
-                'nisha',
-                'job_karov',
+                *[site for site in SITES if site != 'telegram_jobs'],
                 Row('telegram_jobs',
                     ButtonHolder(
                         HTML("""

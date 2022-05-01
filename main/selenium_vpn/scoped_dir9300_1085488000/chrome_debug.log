@@ -1,5 +1,0 @@
-[9716:15544:0428/135355.612:INFO:CONSOLE(83)] "on open browser err =>  no headers", source: chrome-extension://mpcaainmfjjigeicjnlkdfajbioopjko/js/background.js (83)
-[9716:15544:0428/135356.210:ERROR:device_event_log_impl.cc(214)] [13:53:56.209] USB: usb_device_handle_win.cc:1049 Failed to read descriptor from node connection: A device attached to the system is not functioning. (0x1F)
-[9716:15544:0428/135406.410:INFO:CONSOLE(6)] "max: 1650, this.model.top=338.265625, left: 1376.953125, this.model.width=155this.tWidth=250w=47.5", source: https://www.jobkarov.com/static/build/full.min.js?104071215 (6)
-[9716:15544:0428/135406.432:INFO:CONSOLE(102)] "[object Object]", source: https://www.jobkarov.com/static/scripts/a/open-accessibility.js (102)
-[9716:15544:0428/135411.202:WARNING:pref_notifier_impl.cc(41)] Pref observer for media_router.cast_allow_all_ips found at shutdown.
