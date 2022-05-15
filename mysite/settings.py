@@ -155,7 +155,7 @@ else:
     SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = ON_TEST
+DEBUG = False
 
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False

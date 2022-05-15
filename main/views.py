@@ -136,11 +136,10 @@ def pre_scrape(response):
                             error_flag, error_value = jobs_scrape(checkbox, user, s3_file)
                         else:
                             error_flag, error_value = jobs_scrape(checkbox, user)
-
                         if error_flag is True:
                             errors.append(f'{checkbox} scraped successfully.')
                         else:
-                            errors.append(error_value)
+                            errors.append(f'{checkbox}: {error_value}')
                     for checked in checked_list:
                         t = Thread(target=scrape, args=(checked,))
                         threads.append(t)

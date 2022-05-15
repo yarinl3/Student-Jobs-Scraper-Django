@@ -9,16 +9,15 @@ except Exception:
 
 
 def jobs_scrape(func, user, *args):
-    funcs = {}
-    for site in SITES:
-        exec(f'from .{SITES[site][1]} import {site}')
-        exec(f'funcs["{site}"] = {site}')
-
+    exec(f'from .{SITES[func][1]} import {func}', globals(), locals())
     try:
+        res = {}
         if len(args) != 0:
-            error = telegram_jobs(user, args[0])
+            exec(f'error = {func}(user, args[0])', locals(), res)
         else:
-            error = funcs[func](user)
+            exec(f'error = {func}(user)', locals(), res)
+        error = res['error']
+
         if error is not None:
             return False, error
         return True, error
