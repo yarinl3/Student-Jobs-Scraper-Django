@@ -56,13 +56,9 @@ def make_filtered_job_list(jobs, blocked_job_locations):
     filtered_jobs = []
     for job in jobs:
         try:
-            print(4)
-            job_title = job[0]['text'].replace('\n', '')
-            print(5)
-            job_location = job[1].replace('\n', '')
-            print(6)
-            job_link = job[2]['href'].replace('\n', '')
-            print(7)
+            job_title = str(job[0]['text']).replace('\n', '')
+            job_location = str(job[1]).replace('\n', '')
+            job_link = str(job[2]['href']).replace('\n', '')
             block_flag = False
 
             # Cuts the location from the sentence:
