@@ -11,7 +11,7 @@ SITES = {'alljobs': ['AllJobs', 'AllJobs_Scraper'], 'drushim': ['Drushim', 'Drus
 
 class ScrapeForm(forms.Form):
     all = forms.BooleanField(label='Select all', required=False)
-    all.widget = forms.CheckboxInput(attrs={'onClick': "toggle(this)"})
+    all.widget = forms.CheckboxInput(attrs={'onclick': "$('input:checkbox').not('#id_all').click();"})
     for site in SITES:
         exec(f'{site} = forms.BooleanField(label="{SITES[site][0]}", required=False)')
 

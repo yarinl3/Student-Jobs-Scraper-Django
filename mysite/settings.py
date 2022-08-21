@@ -138,6 +138,10 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 try:
     ON_TEST = os.environ['ON_TEST']
+    if ON_TEST == 'True':
+        ON_TEST = True
+    else:
+        ON_TEST = False
 except Exception:
     ON_TEST = True
 
