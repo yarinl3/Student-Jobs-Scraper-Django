@@ -10,16 +10,19 @@ from main.helper import add_job
 
 def telegram_jobs(username, *args):
     try:
+        print(1)
         blocked_job_locations = [i.replace('\n', '') for i in
                                  open('Jobs files/blocked_job_location.txt', encoding='utf-8').readlines()]
     except FileNotFoundError:
         blocked_job_locations = []
+    print(2)
     if len(args) != 0:
         unfiltered_jobs, error_flag = make_list(args[0])
     else:
         unfiltered_jobs, error_flag = make_list()
     if error_flag is True:
         return 'Failed to load telegram json file.'
+    print(3)
     filtered_jobs = make_filtered_job_list(unfiltered_jobs, blocked_job_locations)
     add_job(filtered_jobs, username)
 
@@ -53,9 +56,13 @@ def make_filtered_job_list(jobs, blocked_job_locations):
     filtered_jobs = []
     for job in jobs:
         try:
+            print(4)
             job_title = job[0]['text'].replace('\n', '')
+            print(5)
             job_location = job[1].replace('\n', '')
+            print(6)
             job_link = job[2]['href'].replace('\n', '')
+            print(7)
             block_flag = False
 
             # Cuts the location from the sentence:
